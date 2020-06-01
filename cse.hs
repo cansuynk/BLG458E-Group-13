@@ -19,28 +19,30 @@ wind = []
 earth :: [Ninja] -- add the junior ninjas of Land of Earth to that list
 earth = []
 
---empty functions
+--empty functions (these functions will be implemented)
 allCountriesNinjaInfo = putStrLn "empty function"
 roundBetweenNinjas = putStrLn "empty function"
 roundBetweenCountries = putStrLn "empty function"
 exit = putStrLn "empty function"
 
-
 -- option (a) from menu
--- fills the list of given country, sorts the list and prints it
+-- fills the list of given country, sorts the list and prints it (if there is Journeyman, it gives warning)
 aCountryNinjaInfo :: [[[Char]]] -> IO ()
 aCountryNinjaInfo list = do
     putStr "Enter the country code: "
     hFlush stdout
     country <- getLine
     case country of
-        x | x `elem` ["e", "E"] -> mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (earth ++ (fillList list "Earth"))
-        x | x `elem` ["l", "L"] -> mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (lightning ++ (fillList list "Lightning"))
-        x | x `elem` ["w", "W"] -> mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (water ++ (fillList list "Water"))
-        x | x `elem` ["n", "N"] -> mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (wind ++ (fillList list "Wind"))
-        x | x `elem` ["f", "f"] -> mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (fire ++ (fillList list "Fire"))
+        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append earth "Earth")) >> warning (append earth "Earth") "Earth"
+        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append lightning "Lightning")) >> warning (append lightning "Lightning") "Lightning"
+        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append water "Water")) >> warning (append water "Water") "Water"
+        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append wind "Wind")) >> warning (append wind "Wind") "Wind"
+        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append fire "Fire")) >> warning (append fire "Fire") "Fire"
         _ -> putStrLn "unknown country code"
-    putStrLn ""
+        where
+            append list' country' = list' ++ (fillList list country')
+            warning list'' country'' = (if length (filter (\x' -> status x' == "Journeyman") list'') == 1 then putStrLn (country'' ++ " country cannot be included in a fight" ++ "\n") else putStrLn "")
+    
 
 --menu is displayed to user
 menu :: [[[Char]]] -> IO ()
@@ -137,6 +139,7 @@ main = do
 
     -- create a list from file content (each element will be a line)
     let list = splitFeatures $ lines fileContent
+    --print list
     --print $ fire ++ (fillList list "Fire")
     --mapM_ putStrLn $ printList (fire ++ (fillList list "Fire")) --can be converted to higher order function 
     menu list
