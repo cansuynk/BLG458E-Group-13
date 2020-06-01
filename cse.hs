@@ -20,7 +20,6 @@ earth :: [Ninja] -- add the junior ninjas of Land of Earth to that list
 earth = []
 
 --empty functions (these functions will be implemented)
-allCountriesNinjaInfo = putStrLn "empty function"
 roundBetweenNinjas = putStrLn "empty function"
 roundBetweenCountries = putStrLn "empty function"
 exit = putStrLn "empty function"
@@ -42,7 +41,14 @@ aCountryNinjaInfo list = do
         where
             append list' country' = list' ++ (fillList list country')
             warning list'' country'' = (if length (filter (\x' -> status x' == "Journeyman") list'') == 1 then putStrLn (country'' ++ " country cannot be included in a fight" ++ "\n") else putStrLn "")
-    
+
+-- option (b) from menu
+allCountriesNinjaInfo :: [[[Char]]] -> IO ()
+allCountriesNinjaInfo list = do
+    let allCountries = (earth ++ (fillList list "Earth")) ++ (lightning ++ (fillList list "Lightning")) 
+                        ++ (water ++ (fillList list "Water")) ++ (wind ++ (fillList list "Wind")) ++ (fire ++ (fillList list "Fire"))
+    mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 allCountries
+    putStrLn ""   
 
 --menu is displayed to user
 menu :: [[[Char]]] -> IO ()
@@ -65,7 +71,7 @@ menu list = do
 callTheFunction :: [[[Char]]] -> String -> IO()
 callTheFunction list choice'
   | choice' `elem` ["a", "A"] = aCountryNinjaInfo list
-  | choice' `elem` ["b", "B"] = allCountriesNinjaInfo
+  | choice' `elem` ["b", "B"] = allCountriesNinjaInfo list
   | choice' `elem` ["c", "C"] = roundBetweenNinjas
   | choice' `elem` ["d", "D"] = roundBetweenCountries
   | choice' `elem` ["e", "E"] = exit
