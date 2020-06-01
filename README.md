@@ -2,8 +2,8 @@
 BLG458E Term Project
 
 
-# Group Members:
+### Group Members:
 
-150150082 - Mustafa Burak Gürbüz
-150170704 - Cansu Yanık
-150160901 - Joshgun Rzabayli
+150150082 - Mustafa Burak Gürbüz <br/>
+150170704 - Cansu Yanık <br/>
+150160901 - Joshgun Rzabayli <br/>
