@@ -1,5 +1,6 @@
 import System.IO
-import System.Environment 
+import System.Environment
+import Prelude
 
 data Ninja = Ninja {name :: String, country :: Char,
                     status :: String, exam1 :: Float,
@@ -10,7 +11,16 @@ data Ninja = Ninja {name :: String, country :: Char,
 instance Show Ninja where 
     show (Ninja name _ status _ _ _ _ r score) = name ++ ", " ++ "Score: " ++ (show score) ++ " Status: " ++ status ++ ", Round: " ++ (show r)
 
+instance Eq Ninja where
+    (==) ninja1  ninja2 = name ninja1 == name ninja2
 
+instance Ord Ninja where 
+    compare ninja1  ninja2
+        | r ninja1 == r ninja2 = case () of
+            ()| name ninja1  <= name ninja2  -> GT
+              | otherwise -> LT
+        | r ninja1 <= r ninja2 = GT
+        | otherwise = LT
 
 
 fire, lightning, water, wind, earth   :: [Ninja] -- add the junior ninjas of Land of Fire to that list
@@ -33,11 +43,11 @@ aCountryNinjaInfo list = do
     hFlush stdout
     country <- getLine
     case country of
-        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append earth "Earth")) >> warning (append earth "Earth") "Earth"
-        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append lightning "Lightning")) >> warning (append lightning "Lightning") "Lightning"
-        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append water "Water")) >> warning (append water "Water") "Water"
-        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append wind "Wind")) >> warning (append wind "Wind") "Wind"
-        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 (append fire "Fire")) >> warning (append fire "Fire") "Fire"
+        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy (append earth "Earth")) >> warning (append earth "Earth") "Earth"
+        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy (append lightning "Lightning")) >> warning (append lightning "Lightning") "Lightning"
+        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy  (append water "Water")) >> warning (append water "Water") "Water"
+        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy (append wind "Wind")) >> warning (append wind "Wind") "Wind"
+        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy  (append fire "Fire")) >> warning (append fire "Fire") "Fire"
         _ -> putStrLn "unknown country code"
         where
             append list' country' = list' ++ (fillList list country')
@@ -48,7 +58,7 @@ allCountriesNinjaInfo :: [[[Char]]] -> IO ()
 allCountriesNinjaInfo list = do
     let allCountries = (earth ++ (fillList list "Earth")) ++ (lightning ++ (fillList list "Lightning")) 
                         ++ (water ++ (fillList list "Water")) ++ (wind ++ (fillList list "Wind")) ++ (fire ++ (fillList list "Fire"))
-    mapM_ putStrLn $ printList $ sortBy 1 $ sortBy 0 allCountries
+    mapM_ putStrLn $ printList $ sortBy allCountries
     putStrLn ""   
 
 --menu is displayed to user
@@ -127,17 +137,13 @@ calculateScore :: Float -> Float -> Float -> Float -> Float
 calculateScore e1 e2 a1 a2 = 0.5 * e1 + 0.3 * e2 + a1 + a2
 
 -- quick sort is used to sort country lists
-sortBy :: Integer -> [Ninja] -> [Ninja]
-sortBy _ [] = []
-sortBy 0 (x:xs) = sortBy 0 small ++ [x] ++ sortBy 0 large
+sortBy :: [Ninja] -> [Ninja]
+sortBy [] = []
+sortBy (x:xs) = sortBy small ++ [x] ++ sortBy large
     where
-        small = [a | a <- xs, score a <= score x]
-        large = [b | b <- xs, score b > score x]
-        score x' = calculateScore (exam1 x') (exam2 x') (abilityTable $ ability1 x') (abilityTable $ ability2 x')
-sortBy 1 (x:xs) = sortBy 1 small ++ [x] ++ sortBy 1 large
-    where
-        small = [a | a <- xs, r a <= r x]
-        large = [b | b <- xs, r b > r x]
+        small = [a | a <- xs, a <= x]
+        large = [b | b <- xs, b > x]
+
 
 main = do 
     --takes file name from command line
