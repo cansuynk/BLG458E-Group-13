@@ -2,3 +2,5 @@
 *.exe
 *.o
 *.hi
+
+cse_test.hs

@@ -4,19 +4,20 @@ import System.Environment
 data Ninja = Ninja {name :: String, country :: Char,
                     status :: String, exam1 :: Float,
                     exam2 :: Float, ability1 :: String,
-                    ability2 :: String, r :: Int}
-                    deriving (Show)
+                    ability2 :: String, r :: Int, score:: Float}
+
+        
+instance Show Ninja where 
+    show (Ninja name _ status _ _ _ _ r score) = name ++ ", " ++ "Score: " ++ (show score) ++ " Status: " ++ status ++ ", Round: " ++ (show r)
 
 
-fire :: [Ninja] -- add the junior ninjas of Land of Fire to that list
+
+
+fire, lightning, water, wind, earth   :: [Ninja] -- add the junior ninjas of Land of Fire to that list
 fire = []
-lightning :: [Ninja] -- add the junior ninjas of Land of Lightning to that list
 lightning = []
-water :: [Ninja] -- add the junior ninjas of Land of Water to that list
 water = []
-wind :: [Ninja] -- add the junior ninjas of Land of Wind to that list
 wind = []
-earth :: [Ninja] -- add the junior ninjas of Land of Earth to that list
 earth = []
 
 --empty functions (these functions will be implemented)
@@ -94,9 +95,14 @@ fillList :: [[[Char]]] -> [Char] -> [Ninja]
 fillList newList country = [newNinja x | x <- list]
     where
         list = filter (\x' -> (x' !! 1) == country) newList
-        newNinja x = Ninja {name = (x !! 0) , country = head (x !! 1), status = "Junior" , exam1 = (read (x !! 2) :: Float), 
-                    exam2 = (read (x !! 3) :: Float), ability1 = (x !! 4), ability2 = (x !! 5), r = 0 }
-
+        newNinja x = Ninja {name = (x !! 0) , country = head (x !! 1), status = "Junior" , exam1 = e1, 
+                    exam2 = e2, ability1 = a1, ability2 = a2, r = 0,
+                    score = (calculateScore e1 e2 (abilityTable a1) (abilityTable a2))}
+                        where
+                            e1 = (read (x !! 2) :: Float)
+                            e2 = (read (x !! 3) :: Float)
+                            a1 = (x !! 4)
+                            a2 = (x !! 5)
 -- ability impacts
 abilityTable :: String -> Float
 abilityTable ability = case ability of
@@ -114,9 +120,7 @@ abilityTable ability = case ability of
 
 -- print a country list with desired format
 printList :: [Ninja] -> [String]
-printList list = [format x | x <- list]
-    where 
-        format x = name x ++ ", Score: " ++ show (calculateScore (exam1 x) (exam2 x) (abilityTable $ ability1 x) (abilityTable $ ability2 x)) ++ ", Status: " ++ status x ++ ", Round: " ++ show (r x)
+printList list = [show x | x <- list]
     
 -- calculate ninja score based on exams and abilities points
 calculateScore :: Float -> Float -> Float -> Float -> Float
