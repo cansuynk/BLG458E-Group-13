@@ -17,11 +17,24 @@ instance Eq Ninja where
 instance Ord Ninja where 
     compare ninja1  ninja2
         | r ninja1 == r ninja2 = case () of
-            ()| name ninja1  <= name ninja2  -> GT
+            ()| score ninja1  <= score ninja2  -> GT
               | otherwise -> LT
         | r ninja1 <= r ninja2 = GT
         | otherwise = LT
 
+(<?>) :: Ninja -> Ninja -> Bool
+(<?>) ninja1 ninja2 
+        | score ninja1 > score ninja2 = True
+        | score ninja1 < score ninja2 = False
+        | otherwise = case () of
+                ()| a11 + a12 > a21 + a22 -> True
+                  | a11 + a12 < a21 + a22  -> False
+                  | otherwise -> True -- should be replaced with random
+                    where
+                        a11 = (abilityTable $ ability1 ninja1)
+                        a12 = (abilityTable $ ability2 ninja1)
+                        a21 = (abilityTable $ ability1 ninja2)
+                        a22 = (abilityTable $ ability2 ninja2)
 
 fire, lightning, water, wind, earth   :: [Ninja] -- add the junior ninjas of Land of Fire to that list
 fire = []
