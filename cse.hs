@@ -19,8 +19,8 @@ instance Ord Ninja where
         | r ninja1 == r ninja2 = case () of
             ()| score ninja1  <= score ninja2  -> GT
               | otherwise -> LT
-        | r ninja1 <= r ninja2 = GT
-        | otherwise = LT
+        | r ninja1 <= r ninja2 = LT
+        | otherwise = GT
 
 (<?>) :: Ninja -> Ninja -> Bool
 (<?>) ninja1 ninja2 
@@ -55,15 +55,14 @@ aCountryNinjaInfo list = do
     hFlush stdout
     country <- getLine
     case country of
-        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 0)) >> warning (list !! 0) "Earth"
-        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 1)) >> warning (list !! 1) "Lightning"
-        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 2)) >> warning (list !! 2) "Water"
-        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 3)) >> warning (list !! 3) "Wind"
-        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 4)) >> warning (list !! 4) "Fire"
+        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 0)) >> warning (list !! 0) "Earth" >> menu list
+        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 1)) >> warning (list !! 1) "Lightning"  >> menu list
+        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 2)) >> warning (list !! 2) "Water"  >> menu list
+        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 3)) >> warning (list !! 3) "Wind"  >> menu list
+        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 4)) >> warning (list !! 4) "Fire"  >> menu list
         _ -> putStrLn "unknown country code"
         where
             warning list' country' = (if length (filter (\x' -> status x' == "Journeyman") list') == 1 then putStrLn (country' ++ " country cannot be included in a fight" ++ "\n") else putStrLn "")
-
 
 -- option (b) from menu
 allCountriesNinjaInfo ::[[Ninja]] -> IO ()
@@ -71,7 +70,8 @@ allCountriesNinjaInfo list = do
     let allCountries = (earth ++ (list !! 0)) ++ (lightning ++ (list !! 1)) 
                         ++ (water ++ (list !! 2)) ++ (wind ++ (list !! 3)) ++ (fire ++ (list !! 4))
     mapM_ putStrLn $ printList $ sortBy allCountries
-    putStrLn ""   
+    putStrLn ""
+    menu list   
 
 
 --Updates and Notes to my group friends: 
@@ -80,6 +80,12 @@ allCountriesNinjaInfo list = do
 -- Naruto and naruto is considered as different names according to this implementation. Is it OK or not?
 -- Also I change the type of the list using from menu options
 -- previous type: [[[Char]]], new type: [[Ninja]], I think that way will be more efficient for "roundBetweenNinjas" function ???
+
+-- New Updates:
+-- roundBetweenNinjas function is completed
+-- each option from the menu calls menu again (previously menu function was calling itself)
+-- instance Ord is fixed.
+-- maybe functions can be written more effectively ???
 
 -- option (c) from menu
 roundBetweenNinjas :: [[Ninja]] -> IO ()
@@ -115,9 +121,30 @@ roundBetweenNinjas list = do
             else do
                 let ninja2 = filter (\x' -> name x' == ninjaName2) list2
                 if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list 
-                else putStrLn (show ((<?>) (head ninja1)  (head ninja2)))
-    
-    
+                else do 
+                    let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
+                    printWinner
+                    menu newList
+
+   
+
+-- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
+-- also function prints the winner ninja
+updateList :: Bool -> [Ninja] -> [Ninja] -> Ninja -> Ninja -> [[Ninja]] -> ([[Ninja]], IO())
+updateList result list1 list2 ninja1 ninja2 list
+    | result == True    = (update2 list2 ninja2 (update1 list1 ninja1), printWinner $ updateNinja ninja1)
+    | otherwise         = (update2 list1 ninja1 (update1 list2 ninja2), printWinner $ updateNinja ninja2)
+    where
+        update1 l1 n1 = replace' l1 ((filter (/=n1) l1) ++ [updateNinja n1]) list
+        update2 l2 n2 list' = replace' l2 (filter (/=n2) l2) list'
+        updateNinja n1' = (if r n1' + 1 == 3 then n1'{score = score n1' + 10, r = 3, status = "Journeyman"}
+                        else n1'{score = score n1' + 10, r = r n1' + 1})
+        printWinner n1' = putStrLn ("Winner: \"" ++ name n1' ++ ", Round: " ++ show (r n1') ++ ", Status: " ++ status n1' ++ "\"\n")
+
+
+-- function is used to replace an element ([Ninja]) with the new updated element from our list ([[Ninja]])
+replace' :: Eq t => t -> t -> [t] -> [t]
+replace' a b list= map (\x -> if (a == x) then b else x) list
 
 --menu is displayed to user
 menu :: [[Ninja]] -> IO ()
@@ -131,11 +158,12 @@ menu list = do
     hFlush stdout
     choice <- getLine
     callTheFunction list choice
+    {-
     if choice `elem` ["e", "E"]
         then return ()
         else do 
             menu list
-            
+    -}        
 -- menu calls the proper function based on the user selection
 callTheFunction :: [[Ninja]] -> String -> IO()
 callTheFunction list choice'
