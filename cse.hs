@@ -1,6 +1,7 @@
 import System.IO
 import System.Environment
 import Prelude
+import Data.Char (toLower)
 
 data Ninja = Ninja {name :: String, country :: Char,
                     status :: String, exam1 :: Float,
@@ -151,7 +152,7 @@ roundBetweenNinjas list  = do
                             else  do
                                 if null list2 then putStrLn "unknown country code" >> roundBetweenNinjas list
                                 else do
-                                    let ninja2 = filter (\x' -> name x' == ninjaName2) list2
+                                    let ninja2 = filter (\x' -> (map toLower  $ name x') == (map toLower ninjaName2)) list2
                                     if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
                                     else do 
                                         let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
