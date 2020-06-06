@@ -36,7 +36,7 @@ instance Ord Ninja where
                         a21 = (abilityTable $ ability1 ninja2)
                         a22 = (abilityTable $ ability2 ninja2)
 
-getCountryList country list
+getCountryInfo country list
             | country `elem` ["e", "E"] = ((list !! 0), "Earth")
             | country `elem` ["l", "L"] = ((list !! 1), "Lightning")
             | country `elem` ["w", "W"] = ((list !! 2), "Water")
@@ -51,7 +51,7 @@ roundBetweenCountries allNinjas list1 list2 =
     do 
         putStr "Enter the first country code: " >> hFlush stdout
         ninjaCountry1 <- getLine
-        let (list1, county1) = getCountryList ninjaCountry1 allNinjas
+        let (list1, county1) = getCountryInfo ninjaCountry1 allNinjas
         if null list1 
             then
                 putStr "Unknown country code" >> roundBetweenCountries allNinjas [] []
@@ -61,7 +61,7 @@ roundBetweenCountries allNinjas list1 list2 =
                     else  do
                         putStr "Enter the second country code: " >> hFlush stdout
                         ninjaCountry2 <- getLine
-                        let (list2, county2) = getCountryList ninjaCountry2 allNinjas
+                        let (list2, county2) = getCountryInfo ninjaCountry2 allNinjas
                         if null list2 
                             then
                                 putStr "Unknown country code" >> roundBetweenCountries allNinjas list1 []
@@ -93,7 +93,7 @@ aCountryNinjaInfo list = do
     putStr "Enter the country code: "
     hFlush stdout
     country <- getLine
-    let (l, countryName) = getCountryList country list
+    let (l, countryName) = getCountryInfo country list
     let warning = if checkJourneyMan l then countryName ++ " country cannot be included in a fight" ++ "\n" else ""
     if null l then putStrLn  countryName else  mapM_ putStrLn . printList $ sortBy l
     putStrLn warning
@@ -131,26 +131,32 @@ roundBetweenNinjas list  = do
     putStr "Enter the country code of the first ninja: " >> hFlush stdout
     ninjaCountry1 <- getLine
 
-    let (list1, county1) = getCountryList ninjaCountry1 list
-    if null list1 then putStrLn "Unknown country code" >> roundBetweenNinjas list
-        else do
-            let ninja1 = filter (\x' -> name x' == ninjaName1) list1
-            if null ninja1 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
-            else do
-                putStr "Enter the name of the second ninja: " >> hFlush stdout
-                ninjaName2 <- getLine
-                putStr "Enter the country code of the second ninja: " >> hFlush stdout
-                ninjaCountry2 <- getLine
-
-                let (list2, country2) = getCountryList ninjaCountry2 list
-                if null list2 then putStrLn "unknown country code" >> roundBetweenNinjas list
+    let (list1, country1) = getCountryInfo ninjaCountry1 list
+    if checkJourneyMan list1 
+        then putStrLn (country1 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenNinjas list
+        else  do
+            if null list1 then putStrLn "Unknown country code" >> roundBetweenNinjas list
                 else do
-                    let ninja2 = filter (\x' -> name x' == ninjaName2) list2
-                    if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
-                    else do 
-                        let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
-                        printWinner
-                        menu newList
+                    let ninja1 = filter (\x' -> name x' == ninjaName1) list1
+                    if null ninja1 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
+                    else do
+                        putStr "Enter the name of the second ninja: " >> hFlush stdout
+                        ninjaName2 <- getLine
+                        putStr "Enter the country code of the second ninja: " >> hFlush stdout
+                        ninjaCountry2 <- getLine
+
+                        let (list2, country2) = getCountryInfo ninjaCountry2 list
+                        if checkJourneyMan list2 
+                            then putStrLn (country2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenNinjas list
+                            else  do
+                                if null list2 then putStrLn "unknown country code" >> roundBetweenNinjas list
+                                else do
+                                    let ninja2 = filter (\x' -> name x' == ninjaName2) list2
+                                    if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
+                                    else do 
+                                        let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
+                                        printWinner
+                                        menu newList
 
 -- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
 -- also function prints the winner ninja
