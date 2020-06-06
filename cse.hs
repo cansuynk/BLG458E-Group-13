@@ -36,6 +36,39 @@ instance Ord Ninja where
                         a21 = (abilityTable $ ability1 ninja2)
                         a22 = (abilityTable $ ability2 ninja2)
 
+
+getCountryList country list
+            | country `elem` ["e", "E"] = (list !! 0)
+            | country `elem` ["l", "L"] = (list !! 1)
+            | country `elem` ["w", "W"] = (list !! 2)
+            | country `elem` ["n", "N"] = (list !! 3)
+            | country `elem` ["f", "f"] = (list !! 4)
+            |otherwise = []
+
+roundBetweenCountries :: [[Ninja]] -> [Ninja] -> [Ninja]  -> IO ()
+roundBetweenCountries allNinjas list1 list2 =
+    do 
+        putStr "Enter the first country code: " >> hFlush stdout
+        ninjaCountry1 <- getLine
+        let list1 = getCountryList ninjaCountry1 allNinjas
+        if null list1 
+            then
+                putStr "Unknown country code" >> roundBetweenCountries allNinjas [] []
+            else do
+                putStr "Enter the second country code: " >> hFlush stdout
+                ninjaCountry2 <- getLine
+                let list2 = getCountryList ninjaCountry2 allNinjas
+                if null list2 
+                    then
+                        putStr "Unknown country code" >> roundBetweenCountries allNinjas list1 []
+                    else do
+                        let ninja1 = head $ sortBy list1
+                        let ninja2 = head $ sortBy list2
+                        let res = ninja1 <?> ninja2
+                        let (newList,printWinner) = updateList res list1 list2  ninja1 ninja2 allNinjas
+                        printWinner
+                        menu newList
+
 fire, lightning, water, wind, earth   :: [Ninja] -- add the junior ninjas of Land of Fire to that list
 fire = []
 lightning = []
@@ -44,7 +77,6 @@ wind = []
 earth = []
 
 --empty functions (these functions will be implemented)
-roundBetweenCountries = putStrLn "empty function"
 exit = putStrLn "empty function"
 
 -- option (a) from menu
@@ -55,11 +87,11 @@ aCountryNinjaInfo list = do
     hFlush stdout
     country <- getLine
     case country of
-        x | x `elem` ["e", "E"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 0)) >> warning (list !! 0) "Earth" >> menu list
-        x | x `elem` ["l", "L"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 1)) >> warning (list !! 1) "Lightning"  >> menu list
-        x | x `elem` ["w", "W"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 2)) >> warning (list !! 2) "Water"  >> menu list
-        x | x `elem` ["n", "N"] -> (mapM_ putStrLn $ printList $ sortBy (list !! 3)) >> warning (list !! 3) "Wind"  >> menu list
-        x | x `elem` ["f", "f"] -> (mapM_ putStrLn $ printList $ sortBy  (list !! 4)) >> warning (list !! 4) "Fire"  >> menu list
+        x | x `elem` ["e", "E"] -> (mapM_ putStrLn . printList $ sortBy  (list !! 0)) >> warning (list !! 0) "Earth" >> menu list
+        x | x `elem` ["l", "L"] -> (mapM_ putStrLn . printList $ sortBy (list !! 1)) >> warning (list !! 1) "Lightning"  >> menu list
+        x | x `elem` ["w", "W"] -> (mapM_ putStrLn . printList $ sortBy  (list !! 2)) >> warning (list !! 2) "Water"  >> menu list
+        x | x `elem` ["n", "N"] -> (mapM_ putStrLn . printList $ sortBy (list !! 3)) >> warning (list !! 3) "Wind"  >> menu list
+        x | x `elem` ["f", "f"] -> (mapM_ putStrLn . printList $ sortBy  (list !! 4)) >> warning (list !! 4) "Fire"  >> menu list
         _ -> putStrLn "unknown country code"
         where
             warning list' country' = (if length (filter (\x' -> status x' == "Journeyman") list') == 1 then putStrLn (country' ++ " country cannot be included in a fight" ++ "\n") else putStrLn "")
@@ -69,7 +101,7 @@ allCountriesNinjaInfo ::[[Ninja]] -> IO ()
 allCountriesNinjaInfo list = do
     let allCountries = (earth ++ (list !! 0)) ++ (lightning ++ (list !! 1)) 
                         ++ (water ++ (list !! 2)) ++ (wind ++ (list !! 3)) ++ (fire ++ (list !! 4))
-    mapM_ putStrLn $ printList $ sortBy allCountries
+    mapM_ putStrLn . printList $ sortBy allCountries
     putStrLn ""
     menu list   
 
@@ -126,7 +158,8 @@ roundBetweenNinjas list = do
                     printWinner
                     menu newList
 
-   
+
+
 
 -- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
 -- also function prints the winner ninja
@@ -170,7 +203,7 @@ callTheFunction list choice'
   | choice' `elem` ["a", "A"] = aCountryNinjaInfo list
   | choice' `elem` ["b", "B"] = allCountriesNinjaInfo list
   | choice' `elem` ["c", "C"] = roundBetweenNinjas list
-  | choice' `elem` ["d", "D"] = roundBetweenCountries
+  | choice' `elem` ["d", "D"] = roundBetweenCountries list [] []
   | choice' `elem` ["e", "E"] = exit
   | otherwise = putStrLn "unknown option"         
 
