@@ -84,8 +84,8 @@ water = []
 wind = []
 earth = []
 
---empty functions (these functions will be implemented)
-exit = putStrLn "empty function"
+exit :: [[Ninja]] -> IO ()
+exit list = mapM_ putStrLn . printList . sortBy $ filter (\x -> status x == "Journeyman") [ninja | ninjaList <- list,  ninja <- ninjaList]
 
 -- option (a) from menu
 -- fills the list of given country, sorts the list and prints it (if there is Journeyman, it gives warning)
@@ -188,13 +188,9 @@ menu list = do
     putStr "Enter the action: "
     hFlush stdout
     choice <- getLine
-    callTheFunction list choice
-    {-
-    if choice `elem` ["e", "E"]
-        then return ()
-        else do 
-            menu list
-    -}        
+    if choice `elem` ["a", "A", "b", "B", "c", "C", "d", "D", "e", "E"] then  callTheFunction list choice else do  putStrLn "unknown option"  >> menu list  
+
+
 -- menu calls the proper function based on the user selection
 callTheFunction :: [[Ninja]] -> String -> IO()
 callTheFunction list choice'
@@ -202,7 +198,7 @@ callTheFunction list choice'
   | choice' `elem` ["b", "B"] = allCountriesNinjaInfo list
   | choice' `elem` ["c", "C"] = roundBetweenNinjas list
   | choice' `elem` ["d", "D"] = roundBetweenCountries list [] []
-  | choice' `elem` ["e", "E"] = exit
+  | choice' `elem` ["e", "E"] = exit list
   | otherwise = putStrLn "unknown option"         
 
 
