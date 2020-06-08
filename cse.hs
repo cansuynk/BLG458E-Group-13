@@ -47,28 +47,28 @@ getCountryInfo country list
 
 checkJourneyMan list  = length (filter (\x -> status x == "Journeyman") list) == 1
 
-roundBetweenCountries :: [[Ninja]] -> [Ninja] -> [Ninja]  -> IO ()
-roundBetweenCountries allNinjas list1 list2 =
+roundBetweenCountries :: [[Ninja]] -> IO ()
+roundBetweenCountries allNinjas =
     do 
         putStr "Enter the first country code: " >> hFlush stdout
         ninjaCountry1 <- getLine
-        let (list1, county1) = getCountryInfo ninjaCountry1 allNinjas
+        let (list1, country1) = getCountryInfo ninjaCountry1 allNinjas
         if null list1 
             then
-                putStr "Unknown country code" >> roundBetweenCountries allNinjas [] []
+                putStr "Unknown country code \n" >> roundBetweenCountries allNinjas 
             else do
                 if checkJourneyMan list1 
-                    then putStrLn (county1 ++ "country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas [] []
+                    then putStrLn (country1 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas
                     else  do
                         putStr "Enter the second country code: " >> hFlush stdout
                         ninjaCountry2 <- getLine
-                        let (list2, county2) = getCountryInfo ninjaCountry2 allNinjas
+                        let (list2, country2) = getCountryInfo ninjaCountry2 allNinjas
                         if null list2 
                             then
-                                putStr "Unknown country code" >> roundBetweenCountries allNinjas list1 []
+                                putStr "Unknown country code \n" >> roundBetweenCountries allNinjas
                             else do
                                 if checkJourneyMan list2 
-                                    then putStrLn (county2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas [] []
+                                    then putStrLn (country2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas
                                     else do
                                         let ninja1 = head $ sortBy list1
                                         let ninja2 = head $ sortBy list2
@@ -110,19 +110,6 @@ allCountriesNinjaInfo list = do
     menu list   
 
 
---Updates and Notes to my group friends: 
--- For now, "roundBetweenNinjas" function only takes the desired ninjas from the list and prints the result of the match as true/false.
--- Perhaps the function can be written more effectively and in a shorter way????
--- Naruto and naruto is considered as different names according to this implementation. Is it OK or not?
--- Also I change the type of the list using from menu options
--- previous type: [[[Char]]], new type: [[Ninja]], I think that way will be more efficient for "roundBetweenNinjas" function ???
-
--- New Updates:
--- roundBetweenNinjas function is completed
--- each option from the menu calls menu again (previously menu function was calling itself)
--- instance Ord is fixed.
--- maybe functions can be written more effectively ???
-
 -- option (c) from menu
 roundBetweenNinjas :: [[Ninja]] -> IO ()
 roundBetweenNinjas list  = do
@@ -138,7 +125,7 @@ roundBetweenNinjas list  = do
         else  do
             if null list1 then putStrLn "Unknown country code" >> roundBetweenNinjas list
                 else do
-                    let ninja1 = filter (\x' -> name x' == ninjaName1) list1
+                    let ninja1 = filter (\x' -> (map toLower  $ name x') == (map toLower ninjaName1)) list1
                     if null ninja1 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
                     else do
                         putStr "Enter the name of the second ninja: " >> hFlush stdout
@@ -150,7 +137,7 @@ roundBetweenNinjas list  = do
                         if checkJourneyMan list2 
                             then putStrLn (country2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenNinjas list
                             else  do
-                                if null list2 then putStrLn "unknown country code" >> roundBetweenNinjas list
+                                if null list2 then putStrLn "Unknown country code \n" >> roundBetweenNinjas list
                                 else do
                                     let ninja2 = filter (\x' -> (map toLower  $ name x') == (map toLower ninjaName2)) list2
                                     if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
@@ -188,7 +175,7 @@ menu list = do
     putStr "Enter the action: "
     hFlush stdout
     choice <- getLine
-    if choice `elem` ["a", "A", "b", "B", "c", "C", "d", "D", "e", "E"] then  callTheFunction list choice else do  putStrLn "unknown option"  >> menu list  
+    if choice `elem` ["a", "A", "b", "B", "c", "C", "d", "D", "e", "E"] then  callTheFunction list choice else do  putStrLn "Unknown option \n"  >> menu list  
 
 
 -- menu calls the proper function based on the user selection
@@ -197,9 +184,9 @@ callTheFunction list choice'
   | choice' `elem` ["a", "A"] = aCountryNinjaInfo list
   | choice' `elem` ["b", "B"] = allCountriesNinjaInfo list
   | choice' `elem` ["c", "C"] = roundBetweenNinjas list
-  | choice' `elem` ["d", "D"] = roundBetweenCountries list [] []
+  | choice' `elem` ["d", "D"] = roundBetweenCountries list
   | choice' `elem` ["e", "E"] = exit list
-  | otherwise = putStrLn "unknown option"         
+  | otherwise = putStrLn "Unknown option"         
 
 
 -- After reading file, list contains file content line by line, this function is called to split these lines to features
@@ -249,6 +236,7 @@ abilityTable ability = case ability of
     "Summon" -> 50.0
     "Storm" -> 10.0
     "Rock" -> 20.0
+    _ -> 0.0
 
 -- print a country list with desired format
 printList :: [Ninja] -> [String]
@@ -270,12 +258,10 @@ sortBy (x:xs) = sortBy small ++ [x] ++ sortBy large
 main = do 
     --takes file name from command line
     fileName <- getArgs
-    --putStrLn $ head fileName
 
     -- read file
     fileContent <- readFile $ head fileName
 
     -- create a list from file content (each element will be a line)
-    let list = allCountryLists $ splitFeatures $ lines fileContent
-    --print list 
+    let list = allCountryLists $ splitFeatures $ lines fileContent 
     menu list
