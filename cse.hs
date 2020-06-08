@@ -104,6 +104,7 @@ aCountryNinjaInfo list = do
     menu list
 
 -- option (b) from menu
+-- prints all ninjas from five countries
 allCountriesNinjaInfo ::[[Ninja]] -> IO ()
 allCountriesNinjaInfo list = do
     let allCountries = (list !! 0) ++ (list !! 1) ++ (list !! 2) ++ (list !! 3) ++ (list !! 4)
@@ -113,6 +114,7 @@ allCountriesNinjaInfo list = do
 
 
 -- option (c) from menu
+-- function takes necessary inputs from the user, makes a fight and updates the list based on the fight result
 roundBetweenNinjas :: [[Ninja]] -> IO ()
 roundBetweenNinjas list  = do
 
@@ -148,8 +150,10 @@ roundBetweenNinjas list  = do
                                         let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
                                         printWinner
                                         menu newList
+
 -- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
 -- also function prints the winner ninja
+-- also this function checks whether if two ninjas are from the same country
 updateList :: Bool -> [Ninja] -> [Ninja] -> Ninja -> Ninja -> [[Ninja]] -> ([[Ninja]], IO())
 updateList result list1 list2 ninja1 ninja2 list
     | result == True    = (update2 (if (country ninja1 == country ninja2) then snd res1 else list2) ninja2 (fst res1), printWinner $ updateNinja ninja1)
@@ -203,7 +207,8 @@ splitFeatures list@(l:ls) = map tokenize list
             (newList', ll:lls) -> newList' : tokenize lls
 
 
--- function creates a list that contains all ninjas from five countries
+-- function creates a list that contains all ninjas from five countries (list contains lists of countries)
+-- output will be like [earthList, lightningList, waterList, windList, fireList]
 -- this list will be transferred between menu options
 allCountryLists :: [[[Char]]] -> [[Ninja]]
 allCountryLists list =  (fillList list "Earth") : (fillList list "Lightning")
@@ -242,7 +247,7 @@ abilityTable ability = case ability of
     "Rock" -> 20.0
     _ -> 0.0
 
--- print a country list with desired format
+-- print a country list with desired format (string)
 printList :: [Ninja] -> [String]
 printList list = [show x | x <- list]
     
@@ -266,6 +271,7 @@ main = do
     -- read file
     fileContent <- readFile $ head fileName
 
-    -- create a list from file content (each element will be a line)
+    -- create a list from file content 
+    --(each element is a line, split lines to features, create ninja objects and get a list that contains country lists)
     let list = allCountryLists $ splitFeatures $ lines fileContent 
     menu list
