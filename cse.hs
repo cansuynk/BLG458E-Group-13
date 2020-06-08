@@ -138,24 +138,25 @@ roundBetweenNinjas list  = do
                                         let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
                                         printWinner
                                         menu newList
-
 -- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
 -- also function prints the winner ninja
 updateList :: Bool -> [Ninja] -> [Ninja] -> Ninja -> Ninja -> [[Ninja]] -> ([[Ninja]], IO())
 updateList result list1 list2 ninja1 ninja2 list
-    | result == True    = (update2 list2 ninja2 (update1 list1 ninja1), printWinner $ updateNinja ninja1)
-    | otherwise         = (update2 list1 ninja1 (update1 list2 ninja2), printWinner $ updateNinja ninja2)
+    | result == True    = (update2 (if (country ninja1 == country ninja2) then snd res1 else list2) ninja2 (fst res1), printWinner $ updateNinja ninja1)
+    | otherwise         = (update2 (if (country ninja1 == country ninja2) then snd res2 else list1) ninja1 (fst res2), printWinner $ updateNinja ninja2)
     where
         update1 l1 n1 = replace' l1 ((filter (/=n1) l1) ++ [updateNinja n1]) list
-        update2 l2 n2 list' = replace' l2 (filter (/=n2) l2) list'
+        update2 l2 n2 list' = fst (replace' l2 (filter (/=n2) l2) list')
         updateNinja n1' = (if r n1' + 1 == 3 then n1'{score = score n1' + 10, r = 3, status = "Journeyman"}
                         else n1'{score = score n1' + 10, r = r n1' + 1})
         printWinner n1' = putStrLn ("Winner: \"" ++ name n1' ++ ", Round: " ++ show (r n1') ++ ", Status: " ++ status n1' ++ "\"\n")
+        res1 = (update1 list1 ninja1)
+        res2 = (update1 list2 ninja2)
 
 
 -- function is used to replace an element ([Ninja]) with the new updated element from our list ([[Ninja]])
-replace' :: Eq t => t -> t -> [t] -> [t]
-replace' a b list= map (\x -> if (a == x) then b else x) list
+replace' :: Eq t => t -> t -> [t] -> ([t], t)
+replace' a b list= (map (\x -> if (a == x) then b else x) list, b)
 
 --menu is displayed to user
 menu :: [[Ninja]] -> IO ()
