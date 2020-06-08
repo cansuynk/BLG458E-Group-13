@@ -17,7 +17,7 @@ instance Show Ninja where
 instance Eq Ninja where
     (==) ninja1  ninja2 = name ninja1 == name ninja2
 
--- implementing ORD class for ninja, used by sortBy function, if everthing is equal fighter one wins
+-- implementing ORD class for ninja, used by sortBy function
 instance Ord Ninja where 
     compare ninja1  ninja2
         | r ninja1 == r ninja2 = case () of
@@ -26,7 +26,8 @@ instance Ord Ninja where
         | r ninja1 <= r ninja2 = LT
         | otherwise = GT
 
--- Round operation, returns True if fighter one is the winner else false 
+-- Round operation, returns True if fighter one is the winner else false.
+-- If everthing is equal fighter one wins 
 (<?>) :: Ninja -> Ninja -> Bool
 (<?>) ninja1 ninja2 
         | score ninja1 > score ninja2 = True
@@ -34,7 +35,7 @@ instance Ord Ninja where
         | otherwise = case () of
                 ()| a11 + a12 > a21 + a22 -> True
                   | a11 + a12 < a21 + a22  -> False
-                  | otherwise -> True -- should be replaced with random
+                  | otherwise -> True
                     where
                         a11 = (abilityTable $ ability1 ninja1)
                         a12 = (abilityTable $ ability2 ninja1)
