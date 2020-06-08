@@ -3,18 +3,21 @@ import System.Environment
 import Prelude
 import Data.Char (toLower)
 
+-- Extra score attribute for ORD class
 data Ninja = Ninja {name :: String, country :: Char,
                     status :: String, exam1 :: Float,
                     exam2 :: Float, ability1 :: String,
                     ability2 :: String, r :: Int, score:: Float}
 
-        
+-- implementing show class for the ninja         
 instance Show Ninja where 
     show (Ninja name _ status _ _ _ _ r score) = name ++ ", " ++ "Score: " ++ (show score) ++ " Status: " ++ status ++ ", Round: " ++ (show r)
 
+-- implementing Eq class for the ninja, required for ORD class, just check the names   
 instance Eq Ninja where
     (==) ninja1  ninja2 = name ninja1 == name ninja2
 
+-- implementing ORD class for ninja, used by sortBy function, if everthing is equal fighter one wins
 instance Ord Ninja where 
     compare ninja1  ninja2
         | r ninja1 == r ninja2 = case () of
@@ -23,6 +26,7 @@ instance Ord Ninja where
         | r ninja1 <= r ninja2 = LT
         | otherwise = GT
 
+-- Round operation, returns True if fighter one is the winner else false 
 (<?>) :: Ninja -> Ninja -> Bool
 (<?>) ninja1 ninja2 
         | score ninja1 > score ninja2 = True
@@ -37,16 +41,19 @@ instance Ord Ninja where
                         a21 = (abilityTable $ ability1 ninja2)
                         a22 = (abilityTable $ ability2 ninja2)
 
+-- map keystroke to country, return an empty list and error message incase of a typo 
 getCountryInfo list country 
             | country `elem` ["e", "E"] = ((list !! 0), "Earth")
             | country `elem` ["l", "L"] = ((list !! 1), "Lightning")
             | country `elem` ["w", "W"] = ((list !! 2), "Water")
             | country `elem` ["n", "N"] = ((list !! 3), "Wind")
-            | country `elem` ["f", "f"] = ((list !! 4), "Fire")
+            | country `elem` ["f", "F"] = ((list !! 4), "Fire")
             |otherwise = ([], "Unknown country code")
 
+-- check country list, if anyone is promoted to Journeyman return true
 checkJourneyMan list  = length (filter (\x -> status x == "Journeyman") list) == 1
 
+-- option (d) from menu
 roundBetweenCountries :: [[Ninja]] -> IO ()
 roundBetweenCountries allNinjas =
     do 
@@ -78,7 +85,7 @@ roundBetweenCountries allNinjas =
                                         printWinner
                                         menu newList
 
-
+-- option (e) from menu
 exit :: [[Ninja]] -> IO ()
 exit list = mapM_ putStrLn . printList . sortBy $ filter (\x -> status x == "Journeyman") [ninja | ninjaList <- list,  ninja <- ninjaList]
 
