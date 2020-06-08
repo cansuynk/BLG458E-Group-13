@@ -77,12 +77,6 @@ roundBetweenCountries allNinjas =
                                         printWinner
                                         menu newList
 
-fire, lightning, water, wind, earth   :: [Ninja] -- add the junior ninjas of Land of Fire to that list
-fire = []
-lightning = []
-water = []
-wind = []
-earth = []
 
 exit :: [[Ninja]] -> IO ()
 exit list = mapM_ putStrLn . printList . sortBy $ filter (\x -> status x == "Journeyman") [ninja | ninjaList <- list,  ninja <- ninjaList]
@@ -103,8 +97,7 @@ aCountryNinjaInfo list = do
 -- option (b) from menu
 allCountriesNinjaInfo ::[[Ninja]] -> IO ()
 allCountriesNinjaInfo list = do
-    let allCountries = (earth ++ (list !! 0)) ++ (lightning ++ (list !! 1)) 
-                        ++ (water ++ (list !! 2)) ++ (wind ++ (list !! 3)) ++ (fire ++ (list !! 4))
+    let allCountries = (list !! 0) ++ (list !! 1) ++ (list !! 2) ++ (list !! 3) ++ (list !! 4)
     mapM_ putStrLn . printList $ sortBy allCountries
     putStrLn ""
     menu list   
@@ -202,9 +195,9 @@ splitFeatures list@(l:ls) = map tokenize list
 -- function creates a list that contains all ninjas from five countries
 -- this list will be transferred between menu options
 allCountryLists :: [[[Char]]] -> [[Ninja]]
-allCountryLists list = (earth ++ (fillList list "Earth")) : (lightning ++ (fillList list "Lightning")) 
-                            : (water ++ (fillList list "Water")) : (wind ++ (fillList list "Wind")) 
-                            : (fire ++ (fillList list "Fire")) : []
+allCountryLists list =  (fillList list "Earth") : (fillList list "Lightning")
+                            : (fillList list "Water") :  (fillList list "Wind")
+                            : (fillList list "Fire") : []
 
 
 -- function takes an element from list (list contains all ninjas' features like [[f11, f12,..], [f21, f22, ..], ...])
