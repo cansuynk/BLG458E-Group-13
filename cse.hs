@@ -76,15 +76,19 @@ roundBetweenCountries allNinjas =
                             then
                                 putStr "Unknown country code \n" >> roundBetweenCountries allNinjas
                             else do
-                                if checkJourneyMan list2 
-                                    then putStrLn (country2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas
+                                if country1 == country2 
+                                    then 
+                                        putStr "\nOption (d) is for a round between two distinct countries.\nSelect (c) and enter ninjas manually or input two different countries.\n\n" >>  menu allNinjas
                                     else do
-                                        let ninja1 = head $ sortBy list1
-                                        let ninja2 = head $ sortBy list2
-                                        let res = ninja1 <?> ninja2
-                                        let (newList,printWinner) = updateList res list1 list2  ninja1 ninja2 allNinjas
-                                        printWinner
-                                        menu newList
+                                        if checkJourneyMan list2 
+                                            then putStrLn (country2 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas
+                                            else do
+                                                let ninja1 = head $ sortBy list1
+                                                let ninja2 = head $ sortBy list2
+                                                let res = ninja1 <?> ninja2
+                                                let (newList,printWinner) = updateList res list1 list2  ninja1 ninja2 allNinjas
+                                                printWinner
+                                                menu newList
 
 -- option (e) from menu
 exit :: [[Ninja]] -> IO ()
@@ -145,11 +149,13 @@ roundBetweenNinjas list  = do
                                 if null list2 then putStrLn "Unknown country code \n" >> roundBetweenNinjas list
                                 else do
                                     let ninja2 = filter (\x' -> (map toLower  $ name x') == (map toLower ninjaName2)) list2
-                                    if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list
-                                    else do 
-                                        let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
-                                        printWinner
-                                        menu newList
+                                    if null ninja2 then putStrLn "There is no such ninja" >> roundBetweenNinjas list 
+                                    else do
+                                        if ninja1 == ninja2 && country1 == country2 then putStrLn "Please input two different ninjas" >> roundBetweenNinjas list
+                                        else do 
+                                            let (newList,printWinner) = (updateList ((<?>) (head ninja1)  (head ninja2)) list1 list2 (head ninja1) (head ninja2) list)
+                                            printWinner
+                                            menu newList
 
 -- function returns updated list (winner ninja will be updated and defeated ninja will be removed)
 -- also function prints the winner ninja
