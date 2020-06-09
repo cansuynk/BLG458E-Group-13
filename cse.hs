@@ -228,7 +228,7 @@ fillList :: [[[Char]]] -> [Char] -> [Ninja]
 fillList newList country = [newNinja x | x <- list]
     where
         list = filter (\x' -> (x' !! 1) == country) newList
-        newNinja x = Ninja {name = (x !! 0) , country = head (x !! 1), status = "Junior" , exam1 = e1, 
+        newNinja x = Ninja {name = (x !! 0) , country = (if x !! 1 == "Wind" then 'n' else head (x !! 1)), status = "Junior" , exam1 = e1, 
                     exam2 = e2, ability1 = a1, ability2 = a2, r = 0,
                     score = (calculateScore e1 e2 (abilityTable a1) (abilityTable a2))}
                         where
