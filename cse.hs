@@ -64,7 +64,7 @@ roundBetweenCountries allNinjas =
         let (list1, country1) = getCountryInfoCurried ninjaCountry1
         if null list1 
             then
-                putStr (if country1 == "Unknown country code\n" then "Unknown country code\n" else "No available ninja\n") >> roundBetweenCountries allNinjas 
+                putStr (if country1 == "Unknown country code" then "Unknown country code\n" else "No available ninja\n") >> roundBetweenCountries allNinjas 
             else do
                 if checkJourneyMan list1 
                     then putStrLn (country1 ++ " country cannot be included in a fight" ++ "\n") >> roundBetweenCountries allNinjas
@@ -74,7 +74,7 @@ roundBetweenCountries allNinjas =
                         let (list2, country2) = getCountryInfoCurried  ninjaCountry2
                         if null list2 
                             then
-                                putStr (if country2 == "Unknown country code\n" then "Unknown country code\n" else "No available ninja\n") >> roundBetweenCountries allNinjas
+                                putStr (if country2 == "Unknown country code" then "Unknown country code\n" else "No available ninja\n") >> roundBetweenCountries allNinjas
                             else do
                                 if country1 == country2 
                                     then 
@@ -103,7 +103,7 @@ aCountryNinjaInfo list = do
     country <- getLine
     let (l, countryName) = getCountryInfo  list country
     let warning = if checkJourneyMan l then countryName ++ " country cannot be included in a fight" ++ "\n" else ""
-    if null l then putStrLn  countryName else  mapM_ putStrLn . printList $ sortBy l
+    if null l then putStrLn  (if countryName == "Unknown country code" then "Unknown country code\n" else "No available ninja\n") else  mapM_ putStrLn . printList $ sortBy l
     putStrLn warning
     menu list
 
